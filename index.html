@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
 <title>Дашборд инвестиционной оценки · ООО «АМТП»</title>
 <style>
   :root{
@@ -20,7 +21,45 @@
     padding:28px 32px 48px;
     min-height:100vh;
   }
+  body.locked > *:not(#auth-gate){visibility:hidden}
+  body.locked{overflow:hidden}
   h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:700;color:var(--navy)}
+
+  /* ---------- auth gate ---------- */
+  #auth-gate{
+    position:fixed;inset:0;z-index:9999;
+    background:linear-gradient(135deg,#1F3A5F 0%,#16293f 100%);
+    display:flex;align-items:center;justify-content:center;
+    visibility:visible !important;
+  }
+  #auth-gate .box{
+    background:#fff;padding:34px 38px 30px;border-radius:12px;
+    width:90%;max-width:380px;
+    box-shadow:0 20px 60px rgba(0,0,0,.4);
+    border-top:5px solid #C8A24B;
+  }
+  #auth-gate .eyebrow{
+    font-size:10.5px;font-weight:700;letter-spacing:2px;color:#3E6FA0;
+    text-transform:uppercase;margin-bottom:6px;
+  }
+  #auth-gate h2{font-family:Georgia,serif;color:#1F3A5F;font-size:20px;margin-bottom:6px}
+  #auth-gate p{font-size:12.5px;color:#5B7186;margin-bottom:18px;line-height:1.4}
+  #auth-gate input{
+    width:100%;padding:11px 13px;font-size:14px;
+    border:1px solid #D4DEE8;border-radius:6px;
+    font-family:Calibri,"Segoe UI",sans-serif;outline:none;
+    transition:border-color .15s;
+  }
+  #auth-gate input:focus{border-color:#3E6FA0}
+  #auth-gate .err{color:#B4453A;font-size:12px;margin-top:8px;min-height:16px;font-weight:600}
+  #auth-gate button{
+    margin-top:12px;width:100%;padding:11px;
+    background:#1F3A5F;color:#fff;border:none;border-radius:6px;
+    font-weight:700;font-size:12.5px;cursor:pointer;
+    font-family:Calibri,"Segoe UI",sans-serif;letter-spacing:1px;
+    transition:background .15s;
+  }
+  #auth-gate button:hover{background:#16293f}
 
   /* ---------- header ---------- */
   .head{
@@ -170,7 +209,59 @@
   @keyframes pulse{0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}
 </style>
 </head>
-<body>
+<body class="locked">
+
+<div id="auth-gate">
+  <div class="box">
+    <div class="eyebrow">ООО «АМТП»</div>
+    <h2>Защищённый доступ</h2>
+    <p>Дашборд содержит внутренние данные инвестиционной оценки. Введите пароль для просмотра.</p>
+    <input id="auth-pwd" type="password" autocomplete="off" placeholder="Пароль">
+    <div id="auth-err" class="err"></div>
+    <button id="auth-btn" type="button">ВОЙТИ</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const HASH = 'f0d758ea8333aa2979bde396a667995ff50d832a791f96a359a398d12e64afc2';
+  const KEY  = 'amtp_dashboard_auth_v1';
+  const gate = document.getElementById('auth-gate');
+  const body = document.body;
+
+  function unlock(){
+    gate.remove();
+    body.classList.remove('locked');
+  }
+
+  if(sessionStorage.getItem(KEY) === '1'){ unlock(); return; }
+
+  async function sha256(s){
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  async function tryAuth(){
+    const inp = document.getElementById('auth-pwd');
+    const err = document.getElementById('auth-err');
+    err.textContent = '';
+    const h = await sha256(inp.value);
+    if(h === HASH){
+      try { sessionStorage.setItem(KEY, '1'); } catch(e){}
+      unlock();
+    } else {
+      err.textContent = 'Неверный пароль';
+      inp.select();
+    }
+  }
+
+  document.getElementById('auth-btn').addEventListener('click', tryAuth);
+  document.getElementById('auth-pwd').addEventListener('keydown', e => {
+    if(e.key === 'Enter'){ e.preventDefault(); tryAuth(); }
+  });
+  setTimeout(()=>document.getElementById('auth-pwd').focus(), 50);
+})();
+</script>
 
 <div class="head">
   <div class="head-left">
