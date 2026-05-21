@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Дашборд инвестиционной оценки · ООО «АМТП»</title>
+<style>
+  :root{
+    --navy:#1F3A5F; --navy-d:#16293f; --steel:#3E6FA0; --slate:#5B7186;
+    --ice:#EAF1F8; --ice2:#F4F7FA; --line:#D4DEE8; --ink:#23303E;
+    --green:#2E7D52; --amber:#C9881F; --red:#B4453A; --gold:#C8A24B;
+    --paper:#FBFCFD;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Calibri","Segoe UI",-apple-system,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.45;
+    padding:28px 32px 48px;
+    min-height:100vh;
+  }
+  h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:700;color:var(--navy)}
+
+  /* ---------- header ---------- */
+  .head{
+    display:flex;align-items:flex-start;justify-content:space-between;
+    gap:24px;padding-bottom:18px;border-bottom:2px solid var(--navy);
+    margin-bottom:24px;flex-wrap:wrap;
+  }
+  .head-left .eyebrow{
+    font-size:11px;font-weight:700;letter-spacing:2.5px;color:var(--steel);
+    text-transform:uppercase;margin-bottom:6px;
+  }
+  .head-left h1{font-size:28px;line-height:1.15}
+  .head-left .sub{font-size:13px;color:var(--slate);margin-top:5px;max-width:560px}
+  .head-right{
+    text-align:right;font-size:11px;color:var(--slate);
+    border-left:3px solid var(--gold);padding-left:14px;
+  }
+  .head-right b{display:block;font-size:13px;color:var(--navy);font-family:Georgia,serif}
+
+  /* ---------- layout ---------- */
+  .grid{display:grid;grid-template-columns:330px 1fr;gap:22px;align-items:start}
+  @media(max-width:980px){.grid{grid-template-columns:1fr}}
+
+  /* ---------- controls panel ---------- */
+  .panel{
+    background:#fff;border:1px solid var(--line);border-radius:10px;
+    box-shadow:0 6px 22px rgba(31,58,95,.07);overflow:hidden;
+  }
+  .panel-head{
+    background:var(--navy);color:#fff;padding:14px 18px;
+    display:flex;align-items:center;gap:9px;
+  }
+  .panel-head .dot{width:7px;height:18px;background:var(--gold);border-radius:2px}
+  .panel-head h3{color:#fff;font-size:15px}
+  .panel-body{padding:18px}
+
+  .ctrl{margin-bottom:20px}
+  .ctrl:last-child{margin-bottom:6px}
+  .ctrl-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px}
+  .ctrl-label{font-size:12.5px;font-weight:700;color:var(--ink)}
+  .ctrl-val{
+    font-family:Georgia,serif;font-size:16px;font-weight:700;color:var(--navy);
+    background:var(--ice);padding:1px 9px;border-radius:5px;min-width:62px;text-align:center;
+  }
+  .ctrl-desc{font-size:10.5px;color:var(--slate);margin-bottom:9px}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:5px;
+    background:linear-gradient(to right,var(--steel) 0%,var(--steel) var(--fill,50%),var(--line) var(--fill,50%),var(--line) 100%);
+    border-radius:4px;outline:none;cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;
+    background:#fff;border:3px solid var(--navy);cursor:pointer;
+    box-shadow:0 2px 5px rgba(31,58,95,.3);transition:transform .12s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.18)}
+  input[type=range]::-moz-range-thumb{
+    width:18px;height:18px;border-radius:50%;background:#fff;
+    border:3px solid var(--navy);cursor:pointer;
+  }
+  .ctrl-scale{display:flex;justify-content:space-between;font-size:9.5px;color:var(--slate);margin-top:4px}
+
+  .presets{display:flex;gap:7px;margin-top:4px}
+  .preset{
+    flex:1;padding:7px 4px;font-size:11px;font-weight:700;font-family:"Calibri",sans-serif;
+    border:1px solid var(--line);background:var(--ice2);color:var(--navy);
+    border-radius:6px;cursor:pointer;transition:all .14s;
+  }
+  .preset:hover{background:var(--ice);border-color:var(--steel)}
+  .preset.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .preset-lbl{font-size:10.5px;font-weight:700;letter-spacing:1.5px;color:var(--steel);
+    text-transform:uppercase;margin-bottom:7px}
+  .reset{
+    width:100%;margin-top:14px;padding:9px;font-size:11.5px;font-weight:700;
+    font-family:"Calibri",sans-serif;
+    background:#fff;color:var(--slate);border:1px solid var(--line);
+    border-radius:6px;cursor:pointer;transition:all .14s;letter-spacing:.5px;
+  }
+  .reset:hover{color:var(--red);border-color:var(--red)}
+
+  /* ---------- right column ---------- */
+  .right{display:flex;flex-direction:column;gap:22px}
+
+  /* KPI cards */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media(max-width:680px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{
+    background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 16px 14px;
+    box-shadow:0 5px 16px rgba(31,58,95,.06);position:relative;overflow:hidden;
+  }
+  .kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--steel)}
+  .kpi.k-npv::before{background:var(--green)}
+  .kpi.k-pay::before{background:var(--navy)}
+  .kpi.k-irr::before{background:var(--amber)}
+  .kpi.k-tot::before{background:var(--gold)}
+  .kpi .k-cap{font-size:10.5px;font-weight:700;letter-spacing:1px;color:var(--slate);
+    text-transform:uppercase}
+  .kpi .k-val{font-family:Georgia,serif;font-size:30px;font-weight:700;color:var(--navy);
+    margin-top:7px;line-height:1;transition:color .2s}
+  .kpi .k-val .u{font-size:13px;color:var(--slate);font-family:"Calibri",sans-serif}
+  .kpi .k-sub{font-size:10.5px;color:var(--slate);margin-top:6px;line-height:1.3}
+  .kpi .k-val.pos{color:var(--green)}
+  .kpi .k-val.neg{color:var(--red)}
+
+  /* verdict strip */
+  .verdict{
+    background:var(--navy);color:#fff;border-radius:10px;padding:14px 20px;
+    display:flex;align-items:center;gap:14px;box-shadow:0 6px 20px rgba(31,58,95,.14);
+    border-left:6px solid var(--gold);
+  }
+  .verdict .v-badge{
+    font-family:Georgia,serif;font-weight:700;font-size:13px;padding:5px 13px;
+    border-radius:20px;white-space:nowrap;
+  }
+  .verdict .v-badge.go{background:var(--green)}
+  .verdict .v-badge.warn{background:var(--amber)}
+  .verdict .v-badge.no{background:var(--red)}
+  .verdict .v-text{font-size:12.5px;color:#D3DFEC}
+  .verdict .v-text b{color:#fff}
+
+  /* chart cards */
+  .card{
+    background:#fff;border:1px solid var(--line);border-radius:10px;
+    box-shadow:0 5px 16px rgba(31,58,95,.06);overflow:hidden;
+  }
+  .card-head{
+    padding:13px 20px;border-bottom:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;
+  }
+  .card-head h3{font-size:15px}
+  .card-head .hint{font-size:10.5px;color:var(--slate);font-style:italic}
+  .card-body{padding:16px 20px 20px}
+  .chart-wrap{position:relative;width:100%}
+  svg{display:block;width:100%;height:auto;overflow:visible}
+
+  .charts-row{display:grid;grid-template-columns:1.55fr 1fr;gap:22px}
+  @media(max-width:880px){.charts-row{grid-template-columns:1fr}}
+
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;padding-top:12px;
+    border-top:1px solid var(--line)}
+  .legend .li{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--slate)}
+  .legend .sw{width:22px;height:4px;border-radius:2px}
+
+  .foot{margin-top:26px;font-size:10.5px;color:var(--slate);text-align:center;
+    border-top:1px solid var(--line);padding-top:14px;line-height:1.6}
+  .pulse{animation:pulse .4s ease}
+  @keyframes pulse{0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="head-left">
+    <div class="eyebrow">Интерактивная инвестиционная модель</div>
+    <h1>Дашборд оценки приобретения оборудования</h1>
+    <div class="sub">Линия разгрузки вагонов и фасовки минеральных удобрений · ООО «АМТП». Двигайте переменные — NPV, срок окупаемости и денежные потоки пересчитываются по логике исходной Excel-модели.</div>
+  </div>
+  <div class="head-right">
+    <b>Горизонт 2026–2032</b>
+    Инвестиции: 38,9 млн ₽<br>
+    Расчёт в реальном времени
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- ============ CONTROLS ============ -->
+  <div class="panel">
+    <div class="panel-head"><span class="dot"></span><h3>Управляемые переменные</h3></div>
+    <div class="panel-body">
+
+      <div class="preset-lbl">Быстрый выбор сценария</div>
+      <div class="presets">
+        <button class="preset" data-preset="min">Минимальный</button>
+        <button class="preset active" data-preset="base">Базовый</button>
+        <button class="preset" data-preset="max">Максимальный</button>
+      </div>
+
+      <div style="height:16px"></div>
+
+      <div class="ctrl">
+        <div class="ctrl-top">
+          <span class="ctrl-label">Объём перевалки</span>
+          <span class="ctrl-val" id="v-volume">100 000</span>
+        </div>
+        <div class="ctrl-desc">Тонн в год (2027–2032). Главный драйвер результата.</div>
+        <input type="range" id="s-volume" min="40000" max="450000" step="1000" value="100000">
+        <div class="ctrl-scale"><span>40 тыс. т</span><span>450 тыс. т</span></div>
+      </div>
+
+      <div class="ctrl">
+        <div class="ctrl-top">
+          <span class="ctrl-label">Тариф на ПРР</span>
+          <span class="ctrl-val" id="v-tariff">1 000</span>
+        </div>
+        <div class="ctrl-desc">Руб/тонну до инфляции. У конкурентов 1 020–1 242 ₽.</div>
+        <input type="range" id="s-tariff" min="900" max="1300" step="5" value="1000">
+        <div class="ctrl-scale"><span>900 ₽</span><span>1 300 ₽</span></div>
+      </div>
+
+      <div class="ctrl">
+        <div class="ctrl-top">
+          <span class="ctrl-label">Ставка дисконтирования</span>
+          <span class="ctrl-val" id="v-disc">14,5%</span>
+        </div>
+        <div class="ctrl-desc">Стоимость денег. В базе — ключевая ставка ЦБ.</div>
+        <input type="range" id="s-disc" min="8" max="22" step="0.5" value="14.5">
+        <div class="ctrl-scale"><span>8%</span><span>22%</span></div>
+      </div>
+
+      <div class="ctrl">
+        <div class="ctrl-top">
+          <span class="ctrl-label">Темп инфляции</span>
+          <span class="ctrl-val" id="v-infl">5,4%</span>
+        </div>
+        <div class="ctrl-desc">Среднегодовой прогноз. Индексирует тариф и затраты.</div>
+        <input type="range" id="s-infl" min="2" max="12" step="0.1" value="5.4">
+        <div class="ctrl-scale"><span>2%</span><span>12%</span></div>
+      </div>
+
+      <button class="reset" id="reset">↻ Сбросить к базовому сценарию</button>
+    </div>
+  </div>
+
+  <!-- ============ RIGHT ============ -->
+  <div class="right">
+
+    <div class="kpis">
+      <div class="kpi k-npv">
+        <div class="k-cap">NPV проекта</div>
+        <div class="k-val" id="kpi-npv">+7,96<span class="u"> млн ₽</span></div>
+        <div class="k-sub" id="kpi-npv-sub">чистая приведённая стоимость</div>
+      </div>
+      <div class="kpi k-pay">
+        <div class="k-cap">Срок окупаемости</div>
+        <div class="k-val" id="kpi-pay">~6<span class="u"> лет</span></div>
+        <div class="k-sub" id="kpi-pay-sub">по дисконтированному потоку</div>
+      </div>
+      <div class="kpi k-irr">
+        <div class="k-cap">Маржа с тонны</div>
+        <div class="k-val" id="kpi-marg">135<span class="u"> ₽/т</span></div>
+        <div class="k-sub">тариф минус себестоимость ПРР</div>
+      </div>
+      <div class="kpi k-tot">
+        <div class="k-cap">Накопл. ден. поток</div>
+        <div class="k-val" id="kpi-tot">+43,1<span class="u"> млн ₽</span></div>
+        <div class="k-sub">недисконтированный, за горизонт</div>
+      </div>
+    </div>
+
+    <div class="verdict">
+      <span class="v-badge go" id="v-badge">Рекомендуется</span>
+      <span class="v-text" id="v-text">Проект создаёт положительную стоимость и окупается в пределах горизонта.</span>
+    </div>
+
+    <div class="charts-row">
+      <!-- NPV / cash flow chart -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Накопленный денежный поток и NPV</h3>
+          <span class="hint">млн ₽ нарастающим итогом, 2026–2032</span>
+        </div>
+        <div class="card-body">
+          <div class="chart-wrap"><svg id="chart-cf" viewBox="0 0 560 320"></svg></div>
+          <div class="legend">
+            <div class="li"><span class="sw" style="background:#3E6FA0"></span>ЧДП накопительно (недискон.)</div>
+            <div class="li"><span class="sw" style="background:#1F3A5F"></span>NPV — дискон. поток накопительно</div>
+            <div class="li"><span class="sw" style="background:#C9881F;height:0;border-top:2px dashed #C9881F"></span>линия окупаемости</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- payback gauge -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Срок окупаемости</h3>
+          <span class="hint">по дисконтированному потоку</span>
+        </div>
+        <div class="card-body">
+          <div class="chart-wrap"><svg id="chart-pay" viewBox="0 0 300 320"></svg></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="foot">
+  Расчётная логика воспроизводит исходную модель ООО «АМТП» (НДС 22%, налог на прибыль 25%, амортизация = инвестиции ÷ 1,22 ÷ срок).
+  Контрольная сверка: базовый сценарий NPV +7,96 млн ₽, минимальный ≈ 0, максимальный +151,2 млн ₽ — совпадает с Excel.<br>
+  Срок окупаемости считается по дисконтированному денежному потоку — это момент, когда накопленный NPV пересекает ноль (с учётом стоимости денег во времени). Отсчёт от старта проекта (2026 г. — год 0); дробное значение соответствует моменту пересечения нуля внутри года. Дашборд носит аналитический характер и не заменяет финансовую модель.
+</div>
+
+<script>
+// ===================== МОДЕЛЬ (точная копия Excel-логики) =====================
+const FIXED = {
+  invest: 38918400,      // затраты на инвестиции, руб
+  maint: 3261600,        // обслуживание в год, руб (15% от стоимости оборуд.)
+  amortYears: 7,         // срок амортизации
+  costRate: 0.35,        // рентабельность ПРР -> себестоимость = тариф_МКР * (1-0.35)
+  tariffMKR: 1330,       // текущий тариф в МКР для расчёта себестоимости
+};
+// себестоимость в модели привязана к тарифу МКР: 1330*(1-0.35)=864.5 — фиксирована
+const COST_PER_TON = FIXED.tariffMKR * (1 - FIXED.costRate); // 864.5
+
+function runModel(p){
+  // p: {volume, tariff, disc, infl}
+  const n = 8;                       // C..J — последний год (2032) учтён дважды, как в Excel
+  const invest = FIXED.invest, maint = FIXED.maint;
+  const amort = invest / 1.22 / FIXED.amortYears / 1000;  // тыс. руб
+
+  const vol = [], inflK = [], tariffInf = [];
+  for(let i=0;i<n;i++){
+    vol[i] = i===0 ? 0 : p.volume;
+    inflK[i] = i===0 ? 1 : inflK[i-1]*(1+p.infl);
+    tariffInf[i] = p.tariff * inflK[i];
+  }
+  const R=[],VC=[],MC=[],MARG=[],TAX=[],VAT=[];
+  for(let i=0;i<n;i++){
+    R[i]  = tariffInf[i]*vol[i]/1000;                          // выручка, тыс. руб
+    VC[i] = i===0 ? 0 : COST_PER_TON*vol[i]*inflK[i]/1000;     // переменная себестоимость
+    MC[i] = i===0 ? 0 : maint/1000*inflK[i];                  // обслуживание
+    const am = i===0 ? 0 : amort;
+    MARG[i] = R[i] - (VC[i]+MC[i]+am);                        // маржинальная прибыль
+    TAX[i]  = MARG[i]*0.25;                                   // налог на прибыль
+    const vatInvest = i===0 ? (invest/1000)/1.22*0.22 : 0;
+    VAT[i] = (vatInvest + MC[i]*0.22) + (-R[i]*0.22);         // итого НДС к выплате
+  }
+  const ncf=[],dcf=[],cumNCF=[],cumNPV=[];
+  let dk=1;
+  for(let i=0;i<n;i++){
+    const inflow   = R[i]*1.22;
+    const payVar   = -VC[i];
+    const payMaint = -MC[i]*1.22;
+    let payTax;  if(i===0) payTax=0; else if(i===1) payTax=-TAX[1]-TAX[0]; else payTax=-TAX[i];
+    let nds;     if(i===0) nds=0;    else if(i===1) nds=VAT[1]+VAT[0];     else nds=VAT[i];
+    const oper = inflow+payVar+payMaint+payTax+nds;
+    const investCF = i===0 ? -invest/1000 : 0;
+    ncf[i] = oper + investCF;
+    if(i>0) dk = dk*(1-p.disc);
+    dcf[i] = ncf[i]*dk;
+    cumNCF[i] = (i===0?0:cumNCF[i-1]) + ncf[i];
+    cumNPV[i] = (i===0?0:cumNPV[i-1]) + dcf[i];
+  }
+  const npv = cumNPV[n-1];
+  // дисконтированный срок окупаемости: момент, когда накопленный NPV
+  // (дисконтированный поток нарастающим итогом) пересекает ноль.
+  // отсчёт от старта проекта: индекс i = i полных лет от 2026 г.
+  // последний дублирующий период (i=7) повторяет 2032 г. — в шкалу лет не входит.
+  let payback = null;
+  for(let i=0;i<=6;i++){
+    if(cumNPV[i] >= 0){
+      if(i===0){ payback = 0; break; }
+      const prev = cumNPV[i-1];
+      payback = (i-1) + (-prev)/(cumNPV[i]-prev);
+      break;
+    }
+  }
+  return { npv, payback, cumNCF, cumNPV, totalNCF: cumNCF[n-1] };
+}
+
+// ===================== ПРЕСЕТЫ =====================
+const PRESETS = {
+  min:  { volume: 83404, tariff:1000, disc:14.5, infl:5.4 },
+  base: { volume:100000, tariff:1000, disc:14.5, infl:5.4 },
+  max:  { volume:398893, tariff:1000, disc:14.5, infl:5.4 },
+};
+
+// ===================== UI =====================
+const S = {
+  volume: document.getElementById('s-volume'),
+  tariff: document.getElementById('s-tariff'),
+  disc:   document.getElementById('s-disc'),
+  infl:   document.getElementById('s-infl'),
+};
+const fmtInt = n => Math.round(n).toLocaleString('ru-RU');
+const fmt1   = n => n.toLocaleString('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:1});
+const fmt2   = n => n.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+function sliderFill(el){
+  const pct = (el.value-el.min)/(el.max-el.min)*100;
+  el.style.setProperty('--fill', pct+'%');
+}
+
+function getParams(){
+  return {
+    volume: +S.volume.value,
+    tariff: +S.tariff.value,
+    disc:   +S.disc.value/100,
+    infl:   +S.infl.value/100,
+  };
+}
+
+function updateLabels(){
+  document.getElementById('v-volume').textContent = fmtInt(+S.volume.value);
+  document.getElementById('v-tariff').textContent = fmtInt(+S.tariff.value);
+  document.getElementById('v-disc').textContent   = fmt1(+S.disc.value)+'%';
+  document.getElementById('v-infl').textContent   = fmt1(+S.infl.value)+'%';
+  Object.values(S).forEach(sliderFill);
+}
+
+// preset detection
+function syncPresetButtons(){
+  const p = getParams();
+  let match = null;
+  for(const [k,v] of Object.entries(PRESETS)){
+    if(Math.abs(v.volume-p.volume)<600 && v.tariff===p.tariff
+       && Math.abs(v.disc/100-p.disc)<1e-9 && Math.abs(v.infl/100-p.infl)<1e-9){
+      match = k;
+    }
+  }
+  document.querySelectorAll('.preset').forEach(b=>{
+    b.classList.toggle('active', b.dataset.preset===match);
+  });
+}
+
+// ===================== ОТРИСОВКА: график потоков =====================
+function drawCashFlow(res){
+  const svg = document.getElementById('chart-cf');
+  const W=560,H=320, mL=52,mR=14,mT=18,mB=42;
+  const years = ['2026','2027','2028','2029','2030','2031','2032'];
+  // 8 точек модели -> на оси показываем 7 лет, последний (дубль 2032) сливаем в точку 2032
+  const cN = res.cumNCF, cD = res.cumNPV;
+  // индексы для отображения: 0..6 = годы, точка 7 накладывается на 2032 (берём итоговое значение в конце 2032)
+  const dispN = [cN[0],cN[1],cN[2],cN[3],cN[4],cN[5],cN[7]];
+  const dispD = [cD[0],cD[1],cD[2],cD[3],cD[4],cD[5],cD[7]];
+  const all = dispN.concat(dispD);
+  let lo = Math.min(...all, 0), hi = Math.max(...all, 0);
+  const pad = (hi-lo)*0.12 || 10;
+  lo -= pad; hi += pad;
+  const x = i => mL + i*(W-mL-mR)/(years.length-1);
+  const y = v => mT + (hi-v)/(hi-lo)*(H-mT-mB);
+
+  let g = '';
+  // grid + y labels
+  const ticks = 5;
+  for(let t=0;t<=ticks;t++){
+    const val = lo + (hi-lo)*t/ticks;
+    const yy = y(val);
+    g += `<line x1="${mL}" y1="${yy}" x2="${W-mR}" y2="${yy}" stroke="#E2E8F0" stroke-width="1"/>`;
+    g += `<text x="${mL-8}" y="${yy+3.5}" text-anchor="end" font-size="9.5" fill="#5B7186" font-family="Calibri">${fmtInt(val/1)}</text>`;
+  }
+  // zero line emphasised
+  if(lo<0 && hi>0){
+    const yz = y(0);
+    g += `<line x1="${mL}" y1="${yz}" x2="${W-mR}" y2="${yz}" stroke="#94A8BD" stroke-width="1.5"/>`;
+  }
+  // x labels
+  years.forEach((yr,i)=>{
+    g += `<text x="${x(i)}" y="${H-mB+18}" text-anchor="middle" font-size="10" fill="#5B7186" font-family="Calibri">${yr}</text>`;
+  });
+
+  // area under NPV line (positive part subtle)
+  const linePath = arr => arr.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+
+  // NCF area
+  const ncfArea = `M${x(0)},${y(dispN[0])} ` + dispN.map((v,i)=>`L${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ')
+    + ` L${x(years.length-1)},${y(Math.max(lo,0)< 0? y_safe(lo):0)}`;
+  function y_safe(){return 0;}
+
+  // payback marker (where cumulative NPV crosses 0)
+  let pbMark = '';
+  if(res.payback!==null && res.payback>0 && res.payback<=6){
+    const px = x(res.payback);
+    pbMark = `<line x1="${px}" y1="${mT}" x2="${px}" y2="${H-mB}" stroke="#C9881F" stroke-width="1.6" stroke-dasharray="5,4"/>`
+      + `<circle cx="${px}" cy="${y(0)}" r="4.5" fill="#C9881F" stroke="#fff" stroke-width="1.5"/>`;
+  }
+
+  // lines
+  g += `<path d="${linePath(dispN)}" fill="none" stroke="#3E6FA0" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+  g += `<path d="${linePath(dispD)}" fill="none" stroke="#1F3A5F" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+  g += pbMark;
+  // dots
+  dispN.forEach((v,i)=> g += `<circle cx="${x(i)}" cy="${y(v)}" r="3.4" fill="#3E6FA0" stroke="#fff" stroke-width="1.4"/>`);
+  dispD.forEach((v,i)=> g += `<circle cx="${x(i)}" cy="${y(v)}" r="3.4" fill="#1F3A5F" stroke="#fff" stroke-width="1.4"/>`);
+  // final NPV value label
+  const lastD = dispD[dispD.length-1];
+  g += `<text x="${x(6)-4}" y="${y(lastD)-9}" text-anchor="end" font-size="11" font-weight="700" fill="#1F3A5F" font-family="Georgia">NPV ${lastD>=0?'+':''}${fmt1(lastD/1000)} млн</text>`;
+
+  svg.innerHTML = g;
+}
+
+// ===================== ОТРИСОВКА: датчик окупаемости =====================
+function drawPayback(res){
+  const svg = document.getElementById('chart-pay');
+  const W=300,H=320, cx=150, cy=170, r=104;
+  const horizon = 7; // лет горизонта
+  const pb = res.payback;
+  // полукруговой датчик 0..7 лет (180°, слева=0, справа=7+)
+  const a0 = Math.PI, a1 = 0; // от 180° до 0°
+  const ang = t => a0 + (a1-a0)*Math.min(t/horizon,1);
+  const pt = (t,rr)=>[cx+Math.cos(ang(t))*rr, cy-Math.sin(ang(t))*rr];
+
+  let g='';
+  // фон-дуга
+  function arc(t0,t1,rr,color,wd){
+    const [x0,y0]=pt(t0,rr),[x1,y1]=pt(t1,rr);
+    const large = (Math.abs(ang(t1)-ang(t0))>Math.PI)?1:0;
+    return `<path d="M${x0.toFixed(2)},${y0.toFixed(2)} A${rr},${rr} 0 ${large} 1 ${x1.toFixed(2)},${y1.toFixed(2)}" fill="none" stroke="${color}" stroke-width="${wd}" stroke-linecap="round"/>`;
+  }
+  // цветные зоны: 0-3 зелёная, 3-6 янтарная, 6-7 красная
+  g += arc(0,horizon,r,'#EAF1F8',16);
+  g += arc(0,3,r,'#2E7D52',16);
+  g += arc(3,6,r,'#C9881F',16);
+  g += arc(6,7,r,'#B4453A',16);
+
+  // деления
+  for(let t=0;t<=horizon;t++){
+    const [xa,ya]=pt(t,r-12),[xb,yb]=pt(t,r+12);
+    g += `<line x1="${xa.toFixed(1)}" y1="${ya.toFixed(1)}" x2="${xb.toFixed(1)}" y2="${yb.toFixed(1)}" stroke="#94A8BD" stroke-width="1.4"/>`;
+    const [xt,yt]=pt(t,r+24);
+    g += `<text x="${xt.toFixed(1)}" y="${yt.toFixed(1)+4}" text-anchor="middle" font-size="9.5" fill="#5B7186" font-family="Calibri">${t}</text>`;
+  }
+
+  // стрелка
+  let needleT, beyond=false;
+  if(pb===null){ needleT=horizon; beyond=true; }
+  else if(pb>horizon){ needleT=horizon; beyond=true; }
+  else needleT=pb;
+  const [nx,ny]=pt(needleT,r-22);
+  g += `<line x1="${cx}" y1="${cy}" x2="${nx.toFixed(2)}" y2="${ny.toFixed(2)}" stroke="#1F3A5F" stroke-width="4" stroke-linecap="round"/>`;
+  g += `<circle cx="${cx}" cy="${cy}" r="9" fill="#1F3A5F"/>`;
+  g += `<circle cx="${cx}" cy="${cy}" r="4" fill="#fff"/>`;
+
+  // центральное значение
+  let big, sub, col;
+  if(beyond){ big='&gt; 7'; sub='не окупается за горизонт'; col='#B4453A'; }
+  else {
+    big = (pb<1? pb.toFixed(2): pb.toFixed(1));
+    sub = 'лет до окупаемости';
+    col = pb<=3?'#2E7D52': pb<=6?'#C9881F':'#B4453A';
+  }
+  g += `<text x="${cx}" y="${cy+58}" text-anchor="middle" font-size="44" font-weight="700" fill="${col}" font-family="Georgia">${big}</text>`;
+  g += `<text x="${cx}" y="${cy+78}" text-anchor="middle" font-size="11" fill="#5B7186" font-family="Calibri">${sub}</text>`;
+  // подписи зон
+  g += `<text x="${cx}" y="${H-14}" text-anchor="middle" font-size="10" fill="#5B7186" font-family="Calibri">Горизонт проекта — 7 лет (2026–2032)</text>`;
+
+  svg.innerHTML = g;
+}
+
+// ===================== ВЕРДИКТ + KPI =====================
+function updateKPIs(res, p){
+  // NPV
+  const npvM = res.npv/1000; // млн руб
+  const elN = document.getElementById('kpi-npv');
+  elN.innerHTML = (npvM>=0?'+':'') + fmt2(npvM) + '<span class="u"> млн ₽</span>';
+  elN.className = 'k-val ' + (npvM>0.5?'pos': npvM<-0.5?'neg':'');
+  document.getElementById('kpi-npv-sub').textContent =
+    npvM>0.5 ? 'проект создаёт стоимость' : npvM<-0.5 ? 'проект разрушает стоимость' : 'на грани безубыточности';
+
+  // payback
+  const elP = document.getElementById('kpi-pay');
+  if(res.payback===null || res.payback>7){
+    elP.innerHTML = '&gt; 7<span class="u"> лет</span>';
+    elP.className = 'k-val neg';
+    document.getElementById('kpi-pay-sub').textContent = 'за пределами горизонта';
+  } else {
+    const v = res.payback<1? res.payback.toFixed(2): res.payback.toFixed(1);
+    elP.innerHTML = v + '<span class="u"> лет</span>';
+    elP.className = 'k-val ' + (res.payback<=3?'pos': res.payback<=6?'':'neg');
+    document.getElementById('kpi-pay-sub').textContent = 'по дисконтированному потоку';
+  }
+
+  // маржа с тонны (до инфляции)
+  const marg = p.tariff - COST_PER_TON;
+  document.getElementById('kpi-marg').innerHTML = fmt1(marg) + '<span class="u"> ₽/т</span>';
+
+  // накопл. ден. поток
+  const totM = res.totalNCF/1000;
+  document.getElementById('kpi-tot').innerHTML = (totM>=0?'+':'') + fmt1(totM) + '<span class="u"> млн ₽</span>';
+
+  // вердикт
+  const badge = document.getElementById('v-badge');
+  const text  = document.getElementById('v-text');
+  if(npvM > 1){
+    badge.className='v-badge go'; badge.textContent='Рекомендуется';
+    text.innerHTML = `При этих параметрах NPV <b>${(npvM>=0?'+':'')+fmt2(npvM)} млн ₽</b>, окупаемость <b>${res.payback!==null&&res.payback<=7?(res.payback<1?res.payback.toFixed(2):res.payback.toFixed(1))+' лет':'> 7 лет'}</b> — проект создаёт стоимость.`;
+  } else if(npvM >= -1){
+    badge.className='v-badge warn'; badge.textContent='На грани';
+    text.innerHTML = `NPV <b>${(npvM>=0?'+':'')+fmt2(npvM)} млн ₽</b> — проект около точки безубыточности. Запаса прочности нет: любое ухудшение уводит в минус.`;
+  } else {
+    badge.className='v-badge no'; badge.textContent='Не окупается';
+    text.innerHTML = `NPV <b>${fmt2(npvM)} млн ₽</b> — при этих параметрах проект разрушает стоимость и не возвращает вложения за горизонт.`;
+  }
+}
+
+// ===================== ГЛАВНЫЙ ЦИКЛ =====================
+function recalc(){
+  updateLabels();
+  const p = getParams();
+  const res = runModel(p);
+  updateKPIs(res, p);
+  drawCashFlow(res);
+  drawPayback(res);
+  syncPresetButtons();
+}
+
+// события
+Object.values(S).forEach(el=>{
+  el.addEventListener('input', recalc);
+});
+document.querySelectorAll('.preset').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const pr = PRESETS[btn.dataset.preset];
+    S.volume.value = pr.volume;
+    S.tariff.value = pr.tariff;
+    S.disc.value   = pr.disc;
+    S.infl.value   = pr.infl;
+    recalc();
+    // micro animation
+    ['kpi-npv','kpi-pay'].forEach(id=>{
+      const e=document.getElementById(id);
+      e.classList.remove('pulse'); void e.offsetWidth; e.classList.add('pulse');
+    });
+  });
+});
+document.getElementById('reset').addEventListener('click', ()=>{
+  const pr = PRESETS.base;
+  S.volume.value=pr.volume; S.tariff.value=pr.tariff; S.disc.value=pr.disc; S.infl.value=pr.infl;
+  recalc();
+});
+
+// старт
+recalc();
+</script>
+</body>
+</html>
